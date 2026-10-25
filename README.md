@@ -31,6 +31,8 @@ tools/      上位机 / 测试脚本
 - [原理图分区图](docs/SCHEMATIC_LAYOUT.md)
 - [BOM](docs/BOM.md)
 - [项目简报](docs/PROJECT_BRIEF.md)
+- [硬件交接说明（A 必读）](docs/A_HANDOVER_NOTES.md)
+- [固件模块规划](docs/FIRMWARE_MODULES.md)
 
 ## 硬件要点
 
