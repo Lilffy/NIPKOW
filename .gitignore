@@ -1,0 +1,11 @@
+﻿# 本地工具与凭据（不要提交）
+.tools/
+.secrets/
+*.bak
+*.tmp
+__pycache__/
+*.pyc
+# 系统
+Thumbs.db
+desktop.ini
+DS_Store
