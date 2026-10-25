@@ -34,6 +34,7 @@ tools/      上位机 / 测试脚本
 - [硬件交接说明（A 必读）](docs/A_HANDOVER_NOTES.md)
 - [固件模块规划](docs/FIRMWARE_MODULES.md)
 - [CubeMX 新建工程指南](docs/CUBEMX_SETUP.md)
+- [M0 动手手册（一起做）](docs/M0_GUIDE.md)
 
 ## 硬件要点
 
