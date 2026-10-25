@@ -41,3 +41,25 @@ firmware/
 3. 中断里只置标志/记时间戳，1 秒 LED 用 SysTick 非阻塞
 4. 切帧只能在索引中断里做，避免撕裂
 5. 失锁判据：索引间隔 > 1.5T 立即熄灯并复位状态机
+
+## 构建（VSCode + CMake）
+
+```powershell
+cd firmware
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
+要求：
+- `arm-none-eabi-gcc` 在 PATH（或设置环境变量 `ARM_GCC_DIR` 指向工具链根目录）
+- CMake ≥ 3.20、Ninja
+- 产物：`build/nipkow-fw.elf / .bin / .hex`
+
+## 烧录
+
+```powershell
+# STM32CubeProgrammer CLI
+& "C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe" -c port=SWD -w build\nipkow-fw.hex -v -rst
+```
+
+或 VSCode 里用 STM32 扩展的 Debug/Run（选 ST-Link）。
