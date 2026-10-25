@@ -33,6 +33,7 @@ tools/      上位机 / 测试脚本
 - [项目简报](docs/PROJECT_BRIEF.md)
 - [硬件交接说明（A 必读）](docs/A_HANDOVER_NOTES.md)
 - [固件模块规划](docs/FIRMWARE_MODULES.md)
+- [CubeMX 新建工程指南](docs/CUBEMX_SETUP.md)
 
 ## 硬件要点
 
