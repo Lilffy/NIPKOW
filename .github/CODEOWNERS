@@ -1,0 +1,24 @@
+# 路径所有权：PR 会自动请求对应 owner 审阅
+# B = @Lilffy   A = @Layla82693
+
+# 固件与制造文件（B）
+/firmware/        @Lilffy
+/hardware/        @Lilffy
+/docs/B_PLAN_AND_GITHUB.md  @Lilffy
+/docs/GITHUB_COLLAB_PROTOCOL.md  @Lilffy
+/docs/TASKS.md    @Lilffy
+/README.md        @Lilffy
+/.github/         @Lilffy
+/.gitignore       @Lilffy
+
+# 硬件/机械文档与测试记录（A）
+/docs/A_*.md      @Layla82693
+/docs/TEAM_SPLIT.md  @Layla82693
+/docs/ROUTING.md  @Layla82693
+/docs/RISKS.md    @Layla82693
+/docs/PCB_P0_PLAYBOOK.md  @Layla82693
+/docs/mech/       @Layla82693
+/docs/TEST_LOG.md @Layla82693
+
+# 脚本：谁加谁负责（默认 B 审）
+/tools/           @Lilffy

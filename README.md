@@ -1,4 +1,4 @@
-# NIPKOW — 柱状尼普科夫鼓机械扫描电视
+﻿# NIPKOW — 柱状尼普科夫鼓机械扫描电视
 
 南京理工大学 · 第四届"嘉立创杯"新生电子设计竞赛参赛作品。
 
@@ -46,6 +46,7 @@ tools/      上位机 / 测试脚本
 - 提交信息：`feat(hw): ...` / `feat(sw): ...` / `docs: ...` / `test: ...`
 - 每个任务一个 Issue，完成需附验收证据
 - 详细流程见 [B_PLAN_AND_GITHUB.md](docs/B_PLAN_AND_GITHUB.md) 第 4 节
+- **两个 AI 协作守则见 [GITHUB_COLLAB_PROTOCOL.md](docs/GITHUB_COLLAB_PROTOCOL.md)**（文件所有权、Issue/PR 规范、每日状态）
 
 ## 组内
 
