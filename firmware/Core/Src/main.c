@@ -1,4 +1,4 @@
-/* M0 骨架：168 MHz、USART2 115200、PB2 心跳灯
+﻿/* M0 骨架：168 MHz、USART2 115200、PB2 心跳灯
  * 板：立创·天空星 STM32F407VET6（8 MHz 外部晶振）
  */
 #include "main.h"
@@ -52,7 +52,7 @@ int main(void)
         {
             last_msg = now;
             printf("[hb] tick=%lu led=%d\r\n", (unsigned long)now,
-                   (HAL_GPIO_ReadPin(LED_PORT, LED_PIN) == GPIO_PIN_RESET) ? 1 : 0);
+                   (HAL_GPIO_ReadPin(LED_PORT, LED_PIN) == GPIO_PIN_SET) ? 1 : 0);
         }
     }
 }
@@ -100,7 +100,7 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
     /* PB2 用户 LED，推挽输出，默认熄灭（高电平） */
-    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
     g.Pin   = LED_PIN;
     g.Mode  = GPIO_MODE_OUTPUT_PP;
     g.Pull  = GPIO_NOPULL;

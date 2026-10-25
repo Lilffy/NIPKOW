@@ -1,4 +1,4 @@
-#ifndef __MAIN_H
+﻿#ifndef __MAIN_H
 #define __MAIN_H
 
 #ifdef __cplusplus
@@ -15,8 +15,8 @@ extern "C" {
 /* 板级定义（与原理图一致） */
 #define LED_PIN          GPIO_PIN_2      /* PB2 用户 LED，低电平点亮 */
 #define LED_PORT         GPIOB
-#define LED_ON()         HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET)
-#define LED_OFF()        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET)
+#define LED_ON()         HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET)   /* PB2 高电平点亮 */
+#define LED_OFF()        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET)
 #define LED_TOGGLE()     HAL_GPIO_TogglePin(LED_PORT, LED_PIN)
 
 #define IR_PIN           GPIO_PIN_1      /* PA1 红外索引输入 */
