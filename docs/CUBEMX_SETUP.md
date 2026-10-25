@@ -5,6 +5,62 @@
 
 ---
 
+## 0. 现在就开始：10 分钟配好引脚（click 级步骤）
+
+> 没有硬件也能做这一步：CubeMX 配置 + 生成代码 + 编译，就是 M0 的"工程部分"。
+
+**① 建工程**
+- `File → New Project` → 搜索框输入 `STM32F407VETx` → 双击选中 → **Start Project**
+
+**② 开外部晶振**
+- 左侧 `System Core → RCC` → **HSE** 选 `Crystal/Ceramic Resonator`
+
+**③ 配时钟（Clock Configuration 页）**
+- 依次点击/修改：`HSE=8`、`PLL Source=HSE`、`PLLM=8`、`PLLN=336`、`PLLP=2`
+- `System Clock Mux` 选 `PLLCLK`
+- `AHB Prescaler=/1`、`APB1=/4`、`APB2=/2`
+- 看到 **HCLK=168、PCLK1=42、PCLK2=84** 就对了
+
+**④ 配引脚（Pinout 视图，直接点芯片图上的引脚）**
+
+| 引脚 | 点它 → 选 | 参数 |
+|---|---|---|
+| PA2 | `USART2_TX` | 左侧 `Connectivity → USART2 → Mode=Asynchronous`，Baud=115200, 8N1 |
+| PA3 | `USART2_RX` | 同上 |
+| PA6 | `TIM3_CH1` | `Timers → TIM3 → Clock Source=Internal Clock`；Channel1~3 都选 `PWM Generation CHx` |
+| PA7 | `TIM3_CH2` | 同上 |
+| PB0 | `TIM3_CH3` | 同上 |
+| PB6 | `TIM4_CH1` | `Timers → TIM4 → Channel1 = PWM Generation CH1` |
+| PA1 | `GPIO_EXTI1` | `System Core → GPIO → PA1`：Mode=`External Interrupt Mode with Falling edge trigger detection`，Pull=`Pull-up` |
+| PB2 | `GPIO_Output` | PA2 名下的设置：Mode=`Output Push Pull`，初始电平 `Low`，Speed=`Low` |
+| PC0 | `GPIO_Input` | Pull=`Pull-up` |
+| PC1 | `GPIO_Input` | Pull=`Pull-up` |
+
+**⑤ 参数细节**
+- `TIM3`：`Prescaler=167`、`Counter Period(ARR)=999` → PWM 1 kHz（168MHz/(167+1)/(999+1)）
+- `TIM4`：同样 `167 / 999` → 1 kHz（后面按电机实物再调）
+- `SYS → Debug` 选 **Serial Wire**（否则下载一次就锁死 SWD）
+- `NVIC` 里勾上 **EXTI line1 interrupt**（M1 要用）
+
+**⑥ 必须关掉的东西**
+- `Connectivity → SPI1` 保持 **Disabled**（PA6/PA7 被 TIM3 占用；板载 SPI Flash 是共用的）
+- 不要开 `USB`、`ETH`、`SDIO` 等不用的外设
+
+**⑦ 生成**
+- `Project Manager`：Project Name=`nipkow-m0`，Toolchain/IDE=**CMake**
+- `Code Generator` 勾 `Generate peripheral initialization as a pair of '.c/.h' files per peripheral`
+- 点 **GENERATE CODE**
+
+**⑧ 检查生成结果**
+打开生成的 `Core/Src/main.c`，确认有：
+- `MX_GPIO_Init()`、`MX_USART2_UART_Init()`、`MX_TIM3_Init()`、`MX_TIM4_Init()`
+- `SystemClock_Config()` 里 `PLLM=8, PLLN=336, PLLP=RCC_PLLP_DIV2`
+- 编译一次（VSCode CMake 或命令行），能出 `.elf` 即成功
+
+> 做完这 8 步，你的 M0"工程骨架"就有了。之后和我写的 `firmware/` 对照，看差异在哪、为什么。
+
+---
+
 ## 1. 新建工程
 
 1. 打开 `D:\STM32\STM32CubeMX.exe`
