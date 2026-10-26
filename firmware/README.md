@@ -63,3 +63,26 @@ cmake --build build
 ```
 
 或 VSCode 里用 STM32 扩展的 Debug/Run（选 ST-Link）。
+
+---
+
+## 目录说明（2026-10-26 更新）
+
+| 路径 | 内容 | 状态 |
+|---|---|---|
+| irmware/cubemx/ | **当前开发工程**：CubeMX 生成（CMake + VSCode），含 M0 代码、.ioc、选择性 HAL | ✅ 可编译（RAM 2224 B / FLASH 19400 B） |
+| irmware/Core/、irmware/third_party/ | 早期手写骨架（参考用，HAL 全量） | 📦 参考 |
+
+### 编译 cubemx 工程
+
+`powershell
+cd firmware/cubemx
+cmake --preset Debug
+cmake --build --preset Debug
+`
+
+要求：rm-none-eabi-gcc 在 PATH，CMake ≥ 3.22，Ninja。
+
+> cubemx/ 是用 CubeMX 重新生成后直接覆盖的工程；.ioc 是唯一配置源。
+> cubemx/Drivers/ 只保留了 CMake 实际引用的 16 个 HAL 源文件 + CMSIS 必要头文件（约 9 MB），
+> 换芯片/加外设后如果 CMake 引用了新的 HAL 文件，需要补拷或直接用 CubeMX 重新生成。
