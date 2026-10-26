@@ -17,12 +17,13 @@
  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "stm32f4xx_hal_gpio.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "main.h"
+#include "ir.h"
+#include "stm32f4xx_hal_gpio.h"
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -33,6 +34,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+/* 取消下一行注释以启动时运行 IR 软件自测。 */
+/* #define IR_SELF_TEST */
 
 /* USER CODE END PD */
 
@@ -107,6 +110,15 @@ int main(void) {
   printf("SYSCLK = %lu Hz\r\n", (unsigned long)HAL_RCC_GetSysClockFreq());
   printf("HCLK   = %lu Hz\r\n", (unsigned long)HAL_RCC_GetHCLKFreq());
   ir_init();
+#ifdef IR_SELF_TEST
+  uint32_t test_start = ir_last_edge_ms();
+  ir_on_edge_at(test_start + 5U);  /* 5ms：丢弃 */
+  ir_on_edge_at(test_start + 25U); /* 25ms：计数 1 */
+  ir_on_edge_at(test_start + 30U); /* 距上次有效边沿 5ms：丢弃 */
+  ir_on_edge_at(test_start + 50U); /* 距上次有效边沿 25ms：计数 2 */
+  printf("[IR TEST] count=%lu (expected 2)\r\n", (unsigned long)ir_count());
+  ir_init();
+#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,10 +128,22 @@ int main(void) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if (HAL_GetTick() - last >= 500U) {
-      last += 500U;
-      HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
+    static bool led_active = false;
+    static uint32_t led_t0 = 0U;
+
+    if (ir_take_event()) {
+      led_active = true;
+      led_t0 = HAL_GetTick();
+      printf("[IR] count=%lu\r\n", (unsigned long)ir_count());
     }
+
+    if (led_active && (HAL_GetTick() - led_t0 >= 1000U)) {
+      led_active = false;
+    }
+
+    HAL_GPIO_WritePin(CORELED_GPIO_Port, CORELED_Pin,
+                      led_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
+
     if (ir_take_event()) {
       printf("[IR] count=%lu last=%lu ms\r\n", (unsigned long)ir_count(),
              (unsigned long)ir_last_edge_ms());
