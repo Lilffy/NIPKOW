@@ -1,21 +1,33 @@
+
+#include "ir.h"
 #include "main.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_gpio.h"
-#include <stdint.h>
-static uint8_t ir_on_edge_isr(void){
-    static uint8_t stable=1U;
-    static uint32_t last=1U;
-    static uint32_t t_edge=0U;
-    uint32_t raw;
-    uint32_t now;
-    raw=(HAL_GPIO_ReadPin(IR_INDEX_GPIO_Port,IR_INDEX_Pin)==GPIO_PIN_RESET)? 0U:1U;
-    now=HAL_GetTick();
-    if(raw!=last){
-        last=raw;
-        t_edge=now;
-    }
-    else if((raw!=stable)&&(uint32_t)(now-t_edge)>=20){
-        stable=raw;
-        if(stable==0U){return 1U;}
-    }
-    return 0U;}
+
+static volatile uint32_t g_last_ms = 0U;
+static volatile uint32_t g_count   = 0U;
+static volatile bool     g_event   = false;
+
+void ir_init(void)
+{
+    
+    g_last_ms = HAL_GetTick();
+}
+
+void ir_on_edge_isr(void)
+{
+    uint32_t now = HAL_GetTick();
+    if ((uint32_t)(now - g_last_ms) < IR_DEBOUNCE_MS)
+        return;                     
+    g_last_ms = now;
+    g_count++;
+    g_event = true;
+}
+
+uint32_t ir_count(void)        { return g_count; }
+uint32_t ir_last_edge_ms(void) { return g_last_ms; }
+
+bool ir_take_event(void)
+{
+    if (!g_event) return false;
+    g_event = false;
+    return true;
+}

@@ -1,30 +1,25 @@
+/* Core/Inc/ir.h —— 只有声明，没有实现 */
+#ifndef IR_H
+#define IR_H
 
-#include "ir.h"
-#include "main.h"     /* 为了 HAL_GetTick / HAL_GPIO_EXTI_Callback */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-static volatile uint32_t g_count      = 0;
-static volatile uint32_t g_last_ms    = 0;
-static volatile bool     g_event      = false;
+#include <stdint.h>
+#include <stdbool.h>
 
-void ir_init(void)
-{
-    /* TODO: 确保 PA1 EXTI 已由 CubeMX 配好；
-     *      如果 NVIC 还没开，在这里 HAL_NVIC_EnableIRQ(EXTI1_IRQn)。 */
+/* 两次边沿间隔小于该值视为抖动，丢弃 */
+#define IR_DEBOUNCE_MS  20U
+
+void     ir_init(void);             /* 初始化（NVIC 由 CubeMX 已使能） */
+void     ir_on_edge_isr(void);      /* EXTI 回调里调用：只记时间戳/置标志 */
+uint32_t ir_count(void);            /* 累计有效脉冲数 */
+uint32_t ir_last_edge_ms(void);     /* 最近一次有效边沿的时间戳(ms) */
+bool     ir_take_event(void);       /* 主循环取事件，取完清除 */
+
+#ifdef __cplusplus
 }
+#endif
 
-void ir_on_edge_isr(void)
-{
-    /* TODO: 1) now = HAL_GetTick();
-     *       2) if (now - g_last_ms < IR_DEBOUNCE_MS) return;  // 抖动
-     *       3) g_last_ms = now; g_count++; g_event = true; */
-}
-
-uint32_t ir_count(void)        { return g_count; }
-uint32_t ir_last_edge_ms(void) { return g_last_ms; }
-
-bool ir_take_event(void)
-{
-    /* TODO: 取走即清（注意：两个边沿挨得近时可能丢一个事件，考虑用计数差分） */
-    if (g_event) { g_event = false; return true; }
-    return false;
-}
+#endif /* IR_H */
