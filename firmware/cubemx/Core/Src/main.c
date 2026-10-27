@@ -22,7 +22,11 @@
 /* USER CODE BEGIN Includes */
 #include "main.h"
 #include "ir.h"
+#include "key.h"
+#include "motor.h"
+#include "rgb.h"
 #include "stm32f4xx_hal_gpio.h"
+#include <stdint.h>
 #include <stdio.h>
 
 /* USER CODE END Includes */
@@ -106,6 +110,8 @@ int main(void) {
   MX_TIM4_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  motor_init();
+  rgb_init();
   printf("\r\n=== NIPKOW M0 ===\r\n");
   printf("SYSCLK = %lu Hz\r\n", (unsigned long)HAL_RCC_GetSysClockFreq());
   printf("HCLK   = %lu Hz\r\n", (unsigned long)HAL_RCC_GetHCLKFreq());
@@ -123,30 +129,123 @@ int main(void) {
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint32_t last = HAL_GetTick();
+  bool prev_led = false;
+  /*按键变量 BEGIN*/
+  static uint8_t target = 0U;
+  static uint8_t level_rgb[3] = {0U, 0U, 0U};  /* 三路各自档位 */
+  static uint8_t level_motor = 0U;          /* 电机档位 */
+  static uint32_t key1_last_cnt = 0U;
+  static uint32_t key2_last_cnt = 0U;
+  /*按键变量 END*/
   while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
     static bool led_active = false;
     static uint32_t led_t0 = 0U;
+    /*按键检测 BEGIN*/
+    key1_press();
+    key2_press();
+    uint32_t key1_current_cnt = key1_cnt();
+    uint32_t key2_current_cnt = key2_cnt();
+    uint32_t difference1 = key1_current_cnt - key1_last_cnt; // RGBM 4
+    uint32_t difference2 = key2_current_cnt - key2_last_cnt; //  level 6
+    
+    for (uint32_t i = 0; i < difference1; i++) {
+      target = (target + 1) % 4;
+    }
+    key1_last_cnt = key1_current_cnt;
+    for (uint32_t i = 0; i < difference2; i++) {
+      if (target == 3U) {
+        level_motor = (uint8_t)((level_motor + 1U) % 6U);
+      } else {
+        level_rgb[target] = (uint8_t)((level_rgb[target] + 1U) % 6U);
+      }
+    }
+    key2_last_cnt = key2_current_cnt;
+
+    /*按键检测 END*/
+    /*自动循环 BEGIN*/
+
+    /*自动循环 END*/
+    /*状态机 BEGIN*/
+    // switch (key1_state) {
+    // case 0://R
+    //   color = 1;
+    //   motor_run = 0;
+    //   break;
+    // case 1://G
+    //   color = 2;
+    //   motor_run = 0;
+    //   break;
+    // case 2://B
+    //   color = 3;
+    //   motor_run = 0;
+    //   break;
+    // case 3://M
+    //   color = 0;
+    //   motor_run = 1;
+    //   break;
+    // default:
+    //   key1_state = 0;
+    //   break;
+    // }
+    // switch (key2_state) {
+    // case 0:
+    //   level = 0;
+    //   //亮度100% 转速100%
+    //   break;
+    // case 1:
+    //   level = 1;
+
+    //   break;
+    // case 2:
+    //   level = 2;
+    //   break;
+    // case 3:
+    //   level = 3;
+    //   break;
+    // case 4:
+    //   level = 4;
+    //   //亮度20% 转速20%
+    //   break;
+    // case 5:
+    // level = 5;
+    // break;
+    // default:
+    //   key2_state = 0;
+    //   break;
+    // }
+
+    if (target == 3U) {
+      motor_set(target, level_motor);
+    } else {
+      rgb_set(target, level_rgb[target]);
+      rgb_use();
+    }
+    /*状态机 END*/
 
     if (ir_take_event()) {
+      static uint32_t ir_print_cnt = 0U;
       led_active = true;
       led_t0 = HAL_GetTick();
-      printf("[IR] count=%lu\r\n", (unsigned long)ir_count());
+      /* 每 10 个事件打印一次，避免 115200 串口拖慢主循环 */
+      if (++ir_print_cnt >= 10U) {
+        ir_print_cnt = 0U;
+        printf("[IR] count=%lu last=%lu ms\r\n", (unsigned long)ir_count(),
+               (unsigned long)ir_last_edge_ms());
+      }
     }
 
     if (led_active && (HAL_GetTick() - led_t0 >= 1000U)) {
       led_active = false;
     }
 
-    HAL_GPIO_WritePin(CORELED_GPIO_Port, CORELED_Pin,
-                      led_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
-
-    if (ir_take_event()) {
-      printf("[IR] count=%lu last=%lu ms\r\n", (unsigned long)ir_count(),
-             (unsigned long)ir_last_edge_ms());
+    if (led_active != prev_led) {
+      prev_led = led_active;
+      HAL_GPIO_WritePin(CORELED_GPIO_Port, CORELED_Pin,
+                        led_active ? GPIO_PIN_SET : GPIO_PIN_RESET);
     }
   }
   /* USER CODE END 3 */
