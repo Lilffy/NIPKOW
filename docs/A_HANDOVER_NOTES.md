@@ -63,17 +63,19 @@
 
 ## 5. 测试点（TP1–TP9）
 
+> 2026-10-27 按网表更正（之前版表错位）。
+
 | 测试点 | 网络 |
 |---|---|
-| TP1 | VIN_MAIN（输入） |
-| TP2 | VIN_PROTECTED（防反接后） |
-| TP3 | +5V_REG |
-| TP4 | +3V3_EXT |
-| TP5 | GND |
-| TP6 | IR_INDEX（PA1） |
-| TP7 | R_PWM（PA6） |
-| TP8 | G_PWM（PA7） |
-| TP9 | B_PWM（PB0） |
+| TP1 | VIN_PROTECTED（防反接后） |
+| TP2 | +5V_REG |
+| TP3 | +3V3_EXT |
+| TP4 | GND |
+| TP5 | IR_INDEX（PA1，红外接收输出） |
+| TP6 | R_PWM（PA6） |
+| TP7 | G_PWM（PA7） |
+| TP8 | B_PWM（PB0） |
+| TP9 | MOTOR_PWM（PB6） |
 
 （以 `schematic.pdf` 为准，若有出入以原理图为准并在 issue 里指出。）
 
