@@ -106,4 +106,51 @@ void scan_frame(const uint8_t frame[16][25][3]);  /* 输出一帧 */
 ## 7. 当前状态
 
 - M0 骨架已在仓库（我写的）
-- M1 待开工：**我先出 `ir.h` + 状态机 + 测试用例，你写 `ir.c`**
+- M1 已完成（`ir.c`：EXTI + 20ms 时间窗消抖 + 事件；main 里 LED 亮 1s 非阻塞）
+- M2 已完成（`rgb.c`：8 色表由 target/level 控制，PNP 反相 `compare = 1000 - duty`）
+- M3 已完成（`motor.c`：TIM4_CH1，CCR 0–1000 六档；PWM 频率待电机实物确认）
+- M4 已完成（2026-10-27）：`uart.c` + `control.c` + `cmd.c`
+
+## 8. M4 串口命令（已实现）
+
+### 分层
+
+| 层 | 文件 | 职责 |
+|---|---|---|
+| 驱动 | `uart.c/h` | USART2 RX 中断 + 256 字节环形缓冲 + 行缓冲；`printf` 走 TX（`_write` 重定向在 main.c） |
+| 状态 | `control.c/h` | 保存 target（R/G/B/M）+ 每路档位（0–5）+ `control_apply()` |
+| 命令 | `cmd.c/h` | 解析一行命令，调 control/rgb/motor/ir |
+
+### 命令表（115200 8N1，`\r\n` 结尾）
+
+| 命令 | 作用 | 示例 |
+|---|---|---|
+| `HELP` | 列出命令 | `HELP` |
+| `STATUS` | 打印 target、四路档位、RGB 占空比 | `STATUS` |
+| `TARGET R\|G\|B\|M` | 选当前目标 | `TARGET G` |
+| `LEVEL 0-5` | 设当前目标档位（0=关，1–5 亮度） | `LEVEL 3` |
+| `RGB r g b` | 直接设三路占空比 0–1000 | `RGB 1000 0 0` |
+| `MOTOR 0-5` | 电机档位（0=停） | `MOTOR 2` |
+| `IR` | 打印红外累计脉冲数 | `IR` |
+| `CLR` | 全灭、电机停 | `CLR` |
+
+### 按键与串口共用同一套状态
+
+- KEY1 短按 = `TARGET` 循环
+- KEY2 短按 = 当前目标 `LEVEL` +1（0→1→…→5→0）
+- 串口改的是同一份 `control` 状态，所以 `STATUS` 能反映按键操作结果
+
+### 验证方法（无板也能看编译；有板用串口）
+
+1. 编译通过（已用 `arm-none-eabi-gcc -Wall -Wextra` 检查 8 个文件，0 warning）
+2. 上电 → 串口发 `HELP` 应回命令表
+3. `TARGET R` + `LEVEL 3` → 红灯 60% 亮度
+4. `RGB 0 1000 0` → 绿灯全亮
+5. `MOTOR 3` → 电机 60% 档
+6. 按键操作后 `STATUS` 数值应同步变化
+
+### 注意
+
+- USART2 的 NVIC 在 CubeMX 生成代码里**没有使能**（`.ioc` 里有但生成代码没调用），所以 `uart_init()` 里手动 `HAL_NVIC_SetPriority/EnableIRQ(USART2_IRQn)`
+- `USART2_IRQHandler` 已在 `stm32f4xx_it.c` 生成（调 `HAL_UART_IRQHandler`），不要重复定义
+- 环形缓冲用「留一个空位」判满，256 字节，115200 下约 22 ms 不读才会溢出
