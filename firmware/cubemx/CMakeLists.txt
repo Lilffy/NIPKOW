@@ -46,6 +46,12 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/ir.c
+    Core/Src/motor.c
+    Core/Src/rgb.c
+    Core/Src/key.c
+Core/Src/uart.c
+Core/Src/control.c
+Core/Src/cmd.c
 )
 
 # Add include paths
