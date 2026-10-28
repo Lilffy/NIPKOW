@@ -25,6 +25,9 @@
 #include "key.h"
 #include "motor.h"
 #include "rgb.h"
+#include "control.h"
+#include "cmd.h"
+#include "uart.h"
 #include "stm32f4xx_hal_gpio.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -116,6 +119,8 @@ int main(void) {
   printf("SYSCLK = %lu Hz\r\n", (unsigned long)HAL_RCC_GetSysClockFreq());
   printf("HCLK   = %lu Hz\r\n", (unsigned long)HAL_RCC_GetHCLKFreq());
   ir_init();
+  control_init();
+  uart_init();
 #ifdef IR_SELF_TEST
   uint32_t test_start = ir_last_edge_ms();
   ir_on_edge_at(test_start + 5U);  /* 5ms：丢弃 */
@@ -130,13 +135,8 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   bool prev_led = false;
-  /*按键变量 BEGIN*/
-  static uint8_t target = 0U;
-  static uint8_t level_rgb[3] = {0U, 0U, 0U};  /* 三路各自档位 */
-  static uint8_t level_motor = 0U;          /* 电机档位 */
   static uint32_t key1_last_cnt = 0U;
   static uint32_t key2_last_cnt = 0U;
-  /*按键变量 END*/
   while (1) {
     /* USER CODE END WHILE */
 
@@ -153,78 +153,26 @@ int main(void) {
     uint32_t difference2 = key2_current_cnt - key2_last_cnt; //  level 6
     
     for (uint32_t i = 0; i < difference1; i++) {
-      target = (target + 1) % 4;
+      control_next_target();
     }
     key1_last_cnt = key1_current_cnt;
     for (uint32_t i = 0; i < difference2; i++) {
-      if (target == 3U) {
-        level_motor = (uint8_t)((level_motor + 1U) % 6U);
-      } else {
-        level_rgb[target] = (uint8_t)((level_rgb[target] + 1U) % 6U);
-      }
+      control_level_step();
     }
     key2_last_cnt = key2_current_cnt;
+    if ((difference1 > 0U) || (difference2 > 0U)) {
+      control_apply();
+    }
+
+    /* 串口命令（M4）：非阻塞，收到完整一行才处理 */
+    cmd_poll();
 
     /*按键检测 END*/
     /*自动循环 BEGIN*/
 
     /*自动循环 END*/
-    /*状态机 BEGIN*/
-    // switch (key1_state) {
-    // case 0://R
-    //   color = 1;
-    //   motor_run = 0;
-    //   break;
-    // case 1://G
-    //   color = 2;
-    //   motor_run = 0;
-    //   break;
-    // case 2://B
-    //   color = 3;
-    //   motor_run = 0;
-    //   break;
-    // case 3://M
-    //   color = 0;
-    //   motor_run = 1;
-    //   break;
-    // default:
-    //   key1_state = 0;
-    //   break;
-    // }
-    // switch (key2_state) {
-    // case 0:
-    //   level = 0;
-    //   //亮度100% 转速100%
-    //   break;
-    // case 1:
-    //   level = 1;
+    /* 按键/串口的状态统一在 control.c 维护 */
 
-    //   break;
-    // case 2:
-    //   level = 2;
-    //   break;
-    // case 3:
-    //   level = 3;
-    //   break;
-    // case 4:
-    //   level = 4;
-    //   //亮度20% 转速20%
-    //   break;
-    // case 5:
-    // level = 5;
-    // break;
-    // default:
-    //   key2_state = 0;
-    //   break;
-    // }
-
-    if (target == 3U) {
-      motor_set(target, level_motor);
-    } else {
-      rgb_set(target, level_rgb[target]);
-      rgb_use();
-    }
-    /*状态机 END*/
 
     if (ir_take_event()) {
       static uint32_t ir_print_cnt = 0U;
