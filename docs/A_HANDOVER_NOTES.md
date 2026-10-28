@@ -55,9 +55,39 @@
 4. 摸 U3 温度（LM1117-ADJ，压差大时会热；建议加小散热片）
 5. 断电，插核心板，JP1 短接（5 V 注入核心板）
 6. 上电，测核心板 3.3 V；ST-Link 下载 `firmware/` 的 M0 程序
-7. 串口 115200 应看到 `=== NIPKOW M0-v0.1 ===`，PB2 LED 1 Hz 闪烁
+7. 串口 115200 应看到 `=== NIPKOW M0 ===` + `SYSCLK = 168000000 Hz`，PB2 LED 闪（M1 起改为红外触发亮 1 秒）
 
 > ⚠️ 上电前必做：万用表二极管档测 VIN–GND、5V–GND、3V3–GND 无短路。
+
+---
+
+## 4.5 串口（J7）接线与调试
+
+**板上：** J7 = 4P 2.54 排针（HDR-TH_4P），接 USART2（PA2/PA3），固件已配 **115200 8N1**。
+
+| J7 | 网络 | 接 USB-TTL |
+|---|---|---|
+| 1 | GND | **GND（必须共地）** |
+| 2 | UART_TX（PA2） | 模块 **RX** |
+| 3 | UART_RX（PA3） | 模块 **TX** |
+| 4 | UART_VCC | **不接**（R23 默认不贴，无 3.3V 输出） |
+
+**需要买：** CH340 / CP2102 USB-TTL 模块（**电平选 3.3V**，约 5–10 元）+ 杜邦线 ×3 + USB 线。
+
+**接线（交叉）：**
+```
+USB-TTL TX  → J7-3 (PA3, 板 RX)
+USB-TTL RX  ← J7-2 (PA2, 板 TX)
+USB-TTL GND → J7-1 (GND)
+USB-TTL VCC   不接
+```
+
+**排查：**
+- 没输出/乱码 → 先查 **GND 共地**、TX/RX 是否交叉、波特率 115200
+- 模块有 3.3V/5V 跳线 → 确认在 **3.3V**
+- macOS/Linux 可直接 `screen /dev/tty.usbserial* 115200`；Windows 用串口助手/PuTTY/MobaXterm
+
+> 另：核心板自带调试口是 **USART1（PA9/PA10）**，与本板 J7 的 USART2 不是同一路；ST-Link V2 没有虚拟串口，V3 才有。
 
 ---
 
