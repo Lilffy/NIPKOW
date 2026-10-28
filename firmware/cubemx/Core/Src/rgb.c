@@ -45,3 +45,19 @@ void rgb_init(void)
     rgb[2] = 0U;
     rgb_use();                      /* 上电全灭 */
 }
+
+void rgb_set_duty(uint8_t ch, uint16_t duty)
+{
+    if (ch > 2U) {
+        return;
+    }
+    if (duty > PWM_PERIOD) {
+        duty = PWM_PERIOD;
+    }
+    rgb[ch] = duty;
+}
+
+uint16_t rgb_get_duty(uint8_t ch)
+{
+    return (ch <= 2U) ? rgb[ch] : 0U;
+}
