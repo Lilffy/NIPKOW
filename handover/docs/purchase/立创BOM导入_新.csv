@@ -1,0 +1,12 @@
+﻿No.,Quantity,Comment,Designator,Footprint,Value,Manufacturer Part,Manufacturer,Supplier Part,Supplier
+1,2,肖特基二极管,D1,SMA,SS34 40V/3A,,,C7420365,LCSC
+2,2,贴片 LED,D2,0603,GL0603UG01 绿色,,,C51933293,LCSC
+3,5,PNP 三极管,"Q4,Q5,Q6",SOT-23,S8550，丝印 2TY,,,C20069126,LCSC
+4,2,排母 2×20,"H1,H2",插件,2.54mm 双排母 40P 方孔,,,C53202170,LCSC
+5,1,电源接线端子,J1,插件,XY301V-A-5.0-2P（5.0mm）,,,C9900016950,LCSC
+6,2,XH2.54 插座,J3,插件,A2547WV-4P 立式,,,C9900216472,LCSC
+7,3,短路帽,JP1,插件,2.54mm 跳线帽（排针用提供的）,,,C100114,LCSC
+8,9,测试针,TP1–TP9,插件,RH-5000 Ø1.4,,,C5277086,LCSC
+9,2,铝电解电容,C-EXT,直插 6.3×7.7,100µF/25V（≥16V）,,,C72477,LCSC
+10,2,总电源开关,SW1,插件,SS12D10G5 滑动开关（老师群里指定）,,,C7431054,LCSC
+11,4,M3 铜柱,—,—,M3×10 六角双通,,,C551330,LCSC
